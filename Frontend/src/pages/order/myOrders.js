@@ -3,6 +3,8 @@ import Box from '@mui/material/Box';
 import { DataGrid } from '@mui/x-data-grid';
 import {Button, Container, Grid, Typography} from "@mui/material";
 import {useNavigate} from "react-router-dom";
+import {useEffect, useState} from "react";
+import { format } from 'date-fns';
 
 const columns = [
     { field: 'id', headerName: 'ID', width: 90 },
@@ -62,22 +64,36 @@ const columns = [
     },
 ];
 
-const rows = [
-    { id: 1, order: '00009100', date: '27/02/2024', products:1,finalPrice: 14 },
-    { id: 2, order: '00009101', date: '17/02/2024',products:2, finalPrice: 31 },
-    { id: 3, order: '00009102', date: '15/03/2024', products:3,finalPrice: 31 },
-    { id: 4, order: '00009103', date: '18/03/2024', products:3,finalPrice: 11 },
-    { id: 5, order: '00009104', date: '22/03/2024', products:5,finalPrice: 98.76 },
-    { id: 6, order: '00009105', date: '25/03/2024', products:1,finalPrice: 150 },
-    { id: 7, order: '00009106', date: '31/04/2024', products:7,finalPrice: 44 },
-    { id: 8, order: '00009107', date: '27/05/2024', products:10,finalPrice: 36 },
-    { id: 9, order: '00009108', date: '28/05/2024', products:15,finalPrice: 65 },
-];
 
 
 const OrdersPage = () => {
     const navigate = useNavigate();
+    const [rows, setRows] = useState([]);
+    useEffect(() => {
 
+        const fetchOrders = async () => {
+            try {
+                console.log("ResultAPI")
+                const response = await fetch('http://localhost:8060/api/orders/getOrders');
+                const data = await response.json();
+                console.log(data);
+                const formattedData = data.map((order) => ({
+                    id: order.id,
+                    order: order.orderID,  // Cambia 'orderNumber' según el campo real en tu API
+                    date: order.date,           // Asegúrate de que 'date' sea el nombre del campo en tu API
+                    products: order.numberProducts,  // Asumiendo que 'products' es una lista en el objeto 'order'
+                    finalPrice: order.finalPrice // Cambia 'finalPrice' según el campo real en tu API
+                }));
+                console.log("formattedData")
+                console.log(formattedData)
+                setRows(formattedData);
+            } catch (error) {
+                console.error("Error fetching orders:", error);
+            }
+        };
+
+        fetchOrders();
+    }, []);
     const handleAddOrder = () => {
         navigate('/add-order/new');
     };
