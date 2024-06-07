@@ -1,36 +1,63 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import { DataGrid } from '@mui/x-data-grid';
-import {Container, Grid, Typography} from "@mui/material";
+import {Button, Container, Grid, Typography} from "@mui/material";
 
 const columns = [
     { field: 'id', headerName: 'ID', width: 90 },
     {
-        field: 'firstName',
-        headerName: 'First name',
-        width: 150,
+        field: 'order',
+        headerName: 'Order #',
+        width: 250,
         editable: true,
     },
     {
-        field: 'lastName',
-        headerName: 'Last name',
-        width: 150,
+        field: 'date',
+        headerName: 'Date',
+        width: 250,
         editable: true,
     },
     {
-        field: 'age',
-        headerName: 'Age',
-        type: 'number',
-        width: 110,
+        field: 'products',
+        headerName: '# Products',
+        width: 210,
         editable: true,
     },
     {
-        field: 'fullName',
-        headerName: 'Full name',
+        field: 'finalPrice',
+        headerName: 'Final Price',
         description: 'This column has a value getter and is not sortable.',
         sortable: false,
-        width: 160,
-        valueGetter: (value, row) => `${row.firstName || ''} ${row.lastName || ''}`,
+        width: 260,
+    },
+
+    {
+        field: 'options',
+        headerName: 'Options',
+        description: 'This column has a value getter and is not sortable.',
+        sortable: false,
+        width: 260,
+        renderCell: (params) => (
+            <div>
+                <Button
+                    variant="contained"
+                    size="small"
+                    sx={{ backgroundColor: '#FFB74D', color: '#fff', marginRight: 1 ,
+                        '&:hover': {
+                            backgroundColor: '#FFA726', // más oscuro al hacer hover
+                        },}}
+                >
+                    Edit
+                </Button>
+                <Button
+                    variant="contained"
+                    color="error"
+                    size="small"
+                >
+                    Delete
+                </Button>
+            </div>
+        ),
     },
 ];
 
@@ -50,8 +77,8 @@ const rows = [
 const ClientsPage = () => {
     return (
         <Container maxWidth="xl" sx={{py:20}}>
-            <Typography variant="h4" sx={{ marginBottom: 2 }}>List of Orders</Typography>
-            <Grid container spacing={3}>
+            <Typography variant="h4" sx={{ marginBottom: 2 }}>My Orders</Typography>
+            <Grid container spacing={3} sx={{py:10}}>
                 <Grid xs={12} sm={12} md={12}>
                 <Box sx={{ height: 400, width: '100%' }}>
                     <DataGrid

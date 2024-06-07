@@ -6,8 +6,10 @@ export default function AppRouter() {
     return (
         <Router>
             <Routes>
-                <Route path="/" element={<ClientsPage />} />
-                {/* Otras rutas aquí */}
+                <Route path="/my-orders" element={<ClientsPage />} />
+                {/* add / edit order */}
+                <Route path="/add-order/:id" element={<ClientsPage />} />
+
             </Routes>
         </Router>
     );
