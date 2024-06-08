@@ -5,6 +5,7 @@ import jakarta.persistence.*;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 @Getter
 @Setter
@@ -22,6 +23,7 @@ public class OrderLine {
     @ManyToOne
     @JoinColumn(name = "order_id")
     @JsonIgnore // Esto evita la recursión infinita al serializar
+    @ToString.Exclude
     private Order order;
 
     @ManyToOne

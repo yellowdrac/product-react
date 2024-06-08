@@ -8,4 +8,6 @@ public interface OrderProjection {
     Date getDate();
     Integer getNumberProducts();
     Double getFinalPrice();
+
+    void setDate(Date from);
 }
