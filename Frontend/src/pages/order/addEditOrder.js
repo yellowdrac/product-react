@@ -25,6 +25,8 @@ import {
 } from '@mui/material';
 import {useEffect, useState} from 'react';
 import {useNavigate} from "react-router-dom";
+import LoadingSpinner from "../../components/loadingSpinner";
+import CustomModal from "../../components/customModal";
 
 
 const formatDateTime = (dateString) => {
@@ -274,6 +276,18 @@ const AddEditOrderPage = () => {
             hour12: false
         });
     };
+    const handleFormChange = (field, value) => {
+        switch (field) {
+            case 'productId':
+                setProductId(value);
+                break;
+            case 'qty':
+                setQty(value);
+                break;
+            default:
+                break;
+        }
+    };
     const getUTCMinusFiveDate = () => {
         const date = new Date();
 
@@ -292,24 +306,7 @@ const AddEditOrderPage = () => {
                 {isEdit ? 'Edit Order' : 'Add Order'}
             </Typography>
             {loading ? (
-                <Box
-                    sx={{
-                        display: 'flex',
-                        flexDirection: 'column',
-                        justifyContent: 'center',
-                        alignItems: 'center',
-                        textAlign: 'center',
-                        height: 'auto',
-                        mt: '10%',
-                        mb: '10%',
-                        width: '100%',
-                    }}
-                >
-                    <CircularProgress color="primary" />
-                    <Typography variant="h6" sx={{ mt: 1 }}>
-                        Loading...
-                    </Typography>
-                </Box>
+                <LoadingSpinner message="Loading..." />
             ): (
                 noData? (
                         <Box>
@@ -403,128 +400,82 @@ const AddEditOrderPage = () => {
                                 </Grid>
                             </form>
 
-                            <Modal
+                            <CustomModal
                                 open={open}
-                                onClose={handleClose}
-                                aria-labelledby="add-product-modal"
-                                aria-describedby="add-product-form"
-                            >
-                                <Paper sx={{ padding: 2, width: 300, margin: '100px auto' }}>
-                                    <Typography variant="h6" id="add-product-modal">Add New Product</Typography>
-                                    <FormControl fullWidth margin="normal">
-                                        <InputLabel id="product-select-label">Product</InputLabel>
-                                        <Select
-                                            labelId="product-select-label"
-                                            value={productId}
-                                            onChange={(e) => setProductId(e.target.value)}
-                                            label="Product"
-                                        >
-                                            {allProducts.map(product => (
-                                                <MenuItem key={product.id} value={product.id}>
-                                                    {product.name}
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
-                                    </FormControl>
-                                    <TextField
-                                        label="Quantity"
-                                        fullWidth
-                                        margin="normal"
-                                        variant="outlined"
-                                        type="number"
-                                        value={qty}
-                                        onChange={(e) => setQty(e.target.value)}
-                                    />
-                                    <Box display="flex" justifyContent="flex-end" sx={{ mt: 2 }}>
-                                        <Button variant="contained" color="primary" onClick={handleAddProduct}>
-                                            Add Product
-                                        </Button>
-                                    </Box>
-                                </Paper>
-                            </Modal>
+                                onClose={() => setOpen(false)}
+                                title="Add New Product"
+                                isForm={true}
+                                formFields={{
+                                    select: {
+                                        label: "Product",
+                                        name: "productId",
+                                        options: allProducts.map(product => ({
+                                            value: product.id,
+                                            label: product.name
+                                        }))
+                                    },
+                                    textField: {
+                                        label: "Quantity",
+                                        name: "qty",
+                                        type: "number"
+                                    }
+                                }}
+                                formValues={{ productId, qty }}
+                                onFormChange={handleFormChange}
+                                buttons={[
+                                    { label: 'Cancel', onClick: () => setOpen(false) },
+                                    { label: 'Add Product', onClick: handleAddProduct, color: 'primary' },
+                                ]}
+                            />
 
-                            <Modal
+                            <CustomModal
                                 open={openConfirmDeleteModal}
                                 onClose={handleCloseConfirmDeleteModal}
-                                aria-labelledby="delete-product-line-modal"
-                                aria-describedby="delete-product-line-product-form"
-                            >
-                                <Paper sx={{ padding: 2, width: 300, margin: '100px auto' }}>
-                                    <Typography variant="h6" id="confirm-delete-modal">
-                                        Confirm Deletion
-                                    </Typography>
-                                    <Typography id="confirm-delete-form">
-                                        Are you sure you want to delete {selectedProduct && selectedProduct.name}?
-                                    </Typography>
-                                    <Box display="flex" justifyContent="flex-end" sx={{ mt: 2 }}>
-                                        <Button variant="contained" color="primary" onClick={handleConfirmDelete}>
-                                            Confirm
-                                        </Button>
-                                    </Box>                </Paper>
-                            </Modal>
-                            <Modal
+                                title="Confirm Delete"
+                                content={`Are you sure you want to delete ${selectedProduct?.name}?`}
+                                buttons={[
+                                    { label: 'Cancel', onClick: handleCloseConfirmDeleteModal },
+                                    { label: 'Delete', onClick: handleConfirmDelete, color: 'error' },
+                                ]}
+                            />
+                            <CustomModal
                                 open={openConfirmSave}
                                 onClose={handleCloseConfirmSave}
-                                aria-labelledby="confirm-save-modal"
-                                aria-describedby="confirm-save-form"
-                            >
-                                <Paper sx={{ padding: 2, width: 300, margin: '100px auto' }}>
-                                    <Typography variant="h6" id="confirm-save-modal">
-                                        Confirm Order
-                                    </Typography>
-                                    <Typography id="confirm-save-form">
-                                        Are you sure you want to save this order?
-                                    </Typography>
-                                    <Box display="flex" justifyContent="space-between" sx={{ mt: 2 }}>
-                                        <Button variant="contained" color="primary" onClick={handleSaveOrder}>
-                                            Confirm
-                                        </Button>
-                                        <Button variant="contained" color="secondary" onClick={handleCloseConfirmSave}>
-                                            Cancel
-                                        </Button>
-                                    </Box>
-                                </Paper>
-                            </Modal>
-
-                            <Modal
+                                title="Confirm Save"
+                                content="Are you sure you want to save this order?"
+                                buttons={[
+                                    { label: 'Cancel', onClick: handleCloseConfirmSave },
+                                    { label: 'Save', onClick: handleSaveOrder, color: 'primary' },
+                                ]}
+                            />
+                            <CustomModal
                                 open={openEdit}
-                                onClose={handleCloseEdit}
-                                aria-labelledby="edit-product-modal"
-                                aria-describedby="edit-product-form"
-                            >
-                                <Paper sx={{ padding: 2, width: 300, margin: '100px auto' }}>
-                                    <Typography variant="h6" id="edit-product-modal">Edit Product</Typography>
-                                    <FormControl fullWidth margin="normal">
-                                        <InputLabel id="edit-product-select-label">Product</InputLabel>
-                                        <Select
-                                            labelId="edit-product-select-label"
-                                            value={productId}
-                                            onChange={(e) => setProductId(e.target.value)}
-                                            label="Product"
-                                        >
-                                            {allProducts.map(product => (
-                                                <MenuItem key={product.id} value={product.id}>
-                                                    {product.name}
-                                                </MenuItem>
-                                            ))}
-                                        </Select>
-                                    </FormControl>
-                                    <TextField
-                                        label="Quantity"
-                                        fullWidth
-                                        margin="normal"
-                                        variant="outlined"
-                                        type="number"
-                                        value={qty}
-                                        onChange={(e) => setQty(e.target.value)}
-                                    />
-                                    <Box display="flex" justifyContent="flex-end" sx={{ mt: 2 }}>
-                                        <Button variant="contained" color="primary" onClick={handleAddProduct}>
-                                            Update Product
-                                        </Button>
-                                    </Box>
-                                </Paper>
-                            </Modal>
+                                onClose={() => setOpenEdit(false)}
+                                title="Edit Product"
+                                isForm={true}
+                                formFields={{
+                                    select: {
+                                        label: "Product",
+                                        name: "productId",
+                                        options: allProducts.map(product => ({
+                                            value: product.id,
+                                            label: product.name
+                                        }))
+                                    },
+                                    textField: {
+                                        label: "Quantity",
+                                        name: "qty",
+                                        type: "number"
+                                    }
+                                }}
+                                formValues={{ productId, qty }}
+                                onFormChange={handleFormChange}
+                                buttons={[
+                                    { label: 'Cancel', onClick: () => setOpenEdit(false) },
+                                    { label: 'Update Product', onClick: handleAddProduct, color: 'primary' },
+                                ]}
+                            />
+
                             <TableContainer component={Paper} sx={{ mt: 4 }}>
                                 <Table>
                                     <TableHead>

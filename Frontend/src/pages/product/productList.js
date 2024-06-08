@@ -5,6 +5,7 @@ import {Button, CircularProgress, Container, Grid, Modal, Paper, TextField, Typo
 import {useNavigate} from "react-router-dom";
 import {useEffect, useState} from "react";
 import { format } from 'date-fns-tz';
+import LoadingSpinner from "../../components/loadingSpinner";
 
 
 const adjustTimeZone = (dateString) => {
@@ -317,24 +318,7 @@ const ProductsPage = () => {
                 <Grid item xs={12} sm={12} md={12}>
                     <Box sx={{ height: 400, width: '100%' }}>
                         {loading ? (
-                            <Box
-                                sx={{
-                                    display: 'flex',
-                                    flexDirection: 'column',
-                                    justifyContent: 'center',
-                                    alignItems: 'center',
-                                    textAlign: 'center',
-                                    height: 'auto',
-                                    mt: '10%',
-                                    mb: '10%',
-                                    width: '100%',
-                                }}
-                            >
-                                <CircularProgress color="primary" />
-                                <Typography variant="h6" sx={{ mt: 1 }}>
-                                    Loading...
-                                </Typography>
-                            </Box>
+                            <LoadingSpinner message="Loading..." />
                         ): (
 
                             <DataGrid
