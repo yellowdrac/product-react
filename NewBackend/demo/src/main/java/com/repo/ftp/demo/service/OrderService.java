@@ -72,6 +72,7 @@ public class OrderService {
     }
     public void saveCreateOrder(Order order) {
         System.out.println("saveCreate");
+        System.out.println(order);
         Order savedOrder = orderRepository.save(order);
 
         // Asignar la instancia Order guardada a las OrderLines y guardarlas

@@ -1,7 +1,7 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import { DataGrid } from '@mui/x-data-grid';
-import {Button, CircularProgress, Container, Grid, Modal, Paper, Typography} from "@mui/material";
+import {Button, CircularProgress, Container, Grid, Modal, Paper, Typography, Chip} from "@mui/material";
 import {useNavigate} from "react-router-dom";
 import {useEffect, useState} from "react";
 import { format } from 'date-fns-tz';
@@ -10,9 +10,9 @@ import { format } from 'date-fns-tz';
 const adjustTimeZone = (dateString) => {
     const date = new Date(dateString);
     const offset = date.getTimezoneOffset();
-    const adjustedDate = new Date(date.getTime() + (5 * 60 * 60 * 1000));
+    const adjustedDate = new Date(date.getTime() );
 
-    // Formatear la fecha según el formato deseado
+
     const day = String(adjustedDate.getDate()).padStart(2, '0');
     const monthNamesShort = [
         'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
@@ -41,8 +41,8 @@ const OrdersPage = () => {
         navigate('/add-order/'+params.id);
     };
     const handleRemoveOrder = (params) => {
-        console.log("param  remove");
-        console.log(params);
+
+
         setSelectedOrder(params)
         setConfirmDelete(true);
     };
@@ -50,9 +50,32 @@ const OrdersPage = () => {
     const columns = [
         { field: 'id', headerName: 'ID', width: 90 },
         {
+            field: 'status',
+            headerName: 'Status',
+            width: 150,
+            renderCell: (params) => {
+                let color;
+                switch (params.value) {
+                    case 'Completed':
+                        color = '#5BC403';
+                        break;
+                    case 'Pending':
+                        color = '#E5DE06';
+                        break;
+                    case 'In Progress':
+                        color = '#E59106';
+                        break;
+                    default:
+                        color = 'default';
+                        break;
+                }
+                return <Chip label={params.value} sx={{ backgroundColor: color, color: '#fff' }} />;
+            },
+        },
+        {
             field: 'order',
             headerName: 'Order #',
-            width: 250,
+            width: 150,
         },
         {
             field: 'date',
@@ -85,7 +108,7 @@ const OrdersPage = () => {
                         size="small"
                         sx={{ backgroundColor: '#FFB74D', color: '#fff', marginRight: 1 ,
                             '&:hover': {
-                                backgroundColor: '#FFA726', // más oscuro al hacer hover
+                                backgroundColor: '#FFA726',
                             },}}
                         onClick={() => handleEdit(params.row)}
                     >
@@ -107,7 +130,7 @@ const OrdersPage = () => {
 
         const fetchOrders = async () => {
             try {
-                setLoading(true); // Indicar que la carga ha finalizado
+                setLoading(true);
                 // console.log("ResultAPI")
                 const response = await fetch('http://localhost:8060/api/orders/getOrders');
                 const data = await response.json();
@@ -116,13 +139,13 @@ const OrdersPage = () => {
                     id: order.id,
                     order: order.orderID,
                     date: adjustTimeZone(order.date),
+                    status: order.status,
                     products: order.numberProducts,
                     finalPrice: order.finalPrice.toFixed(2)
                 }));
-                //console.log("formattedData")
-                console.log(formattedData)
+                console.log("formattedData")
                 setRows(formattedData);
-                setLoading(false); // Indicar que la carga ha finalizado
+                setLoading(false);
             } catch (error) {
                 console.error("Error fetching orders:", error);
             }
@@ -142,16 +165,15 @@ const OrdersPage = () => {
                 if (!response.ok) {
                     throw new Error('Failed to delete order');
                 }
-                // Aquí puedes hacer algo después de borrar el pedido, como actualizar la lista de pedidos
-                // o mostrar un mensaje de éxito
+
                 console.log('Order deleted successfully');
             })
             .catch(error => {
                 console.error('Error deleting order:', error);
-                // Aquí puedes mostrar un mensaje de error al usuario si la eliminación falla
+
             })
             .finally(() => {
-                setConfirmDelete(false); // Esto cierra el modal de confirmación después de enviar la solicitud
+                setConfirmDelete(false);
             });
     };
     return (
@@ -197,9 +219,9 @@ const OrdersPage = () => {
                                     justifyContent: 'center',
                                     alignItems: 'center',
                                     textAlign: 'center',
-                                    height: 'auto', // Permite que el contenido se ajuste automáticamente
-                                    mt: '10%', // Ajusta la distancia desde la parte superior
-                                    mb: '10%', // Ajusta la distancia desde la parte inferior
+                                    height: 'auto',
+                                    mt: '10%',
+                                    mb: '10%',
                                     width: '100%',
                                 }}
                             >

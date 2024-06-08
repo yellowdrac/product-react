@@ -25,14 +25,7 @@ public class OrderController {
         List<OrderProjection> orders = orderService.getOrders();
 
         // Obtener la fecha actual en UTC
-        LocalDateTime currentDateTime = LocalDateTime.now(ZoneId.of("UTC"));
 
-        // Ajustar las fechas de los pedidos
-        orders.forEach(order -> {
-            LocalDateTime orderDateTime = order.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-            LocalDateTime adjustedDateTime = orderDateTime.minusHours(5); // Ajustar según tu zona horaria
-            order.setDate(Date.from(adjustedDateTime.atZone(ZoneId.systemDefault()).toInstant()));
-        });
 
         return orders;
     }
@@ -57,18 +50,6 @@ public class OrderController {
     public Optional<Order> getById(@PathVariable("orderId") Long orderId){
         Optional<Order> optionalOrder = orderService.getOrder(orderId);
         Order order = optionalOrder.orElseThrow(() -> new ResourceNotFoundException("Order not found"));
-
-        // Obtener la fecha actual en UTC
-        LocalDateTime currentDateTime = LocalDateTime.now(ZoneId.of("UTC"));
-
-        // Obtener la fecha del pedido
-        LocalDateTime orderDateTime = order.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
-
-        // Restar 5 horas a la fecha del pedido (ajustar según tu zona horaria)
-        LocalDateTime adjustedDateTime = orderDateTime.minusHours(5);
-
-        // Actualizar la fecha del pedido con la fecha ajustada
-        order.setDate(Date.from(adjustedDateTime.atZone(ZoneId.systemDefault()).toInstant()));
 
         return Optional.of(order);
     }

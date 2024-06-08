@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.List;
 
@@ -21,9 +22,10 @@ public class Order {
     private Long id;
     @Column(unique = true,nullable = false)
     private String orderID;
-    private Date date;
+    private LocalDateTime date;
     private Integer numberProducts;
     private Double finalPrice;
+    private String status;
     @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     private List<OrderLine> orderLines;
