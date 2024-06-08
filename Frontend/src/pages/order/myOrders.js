@@ -1,7 +1,7 @@
 import * as React from 'react';
 import Box from '@mui/material/Box';
 import { DataGrid } from '@mui/x-data-grid';
-import {Button, Container, Grid, Typography} from "@mui/material";
+import {Button, CircularProgress, Container, Grid, Modal, Paper, Typography} from "@mui/material";
 import {useNavigate} from "react-router-dom";
 import {useEffect, useState} from "react";
 import { format } from 'date-fns-tz';
@@ -29,16 +29,24 @@ const adjustTimeZone = (dateString) => {
     return `${day} ${monthShort} ${year} ${hours}:${minutes}:${seconds} ${ampm}`;
 };
 
-
-
-
 const OrdersPage = () => {
     const navigate = useNavigate();
     const [rows, setRows] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [openConfirmDeleteModal, setConfirmDelete] = useState(false);
+    const [page, setPage] = useState(1);
+    const [pageSize, setPageSize] = useState(5);
     const handleEdit = (params) => {
         console.log(params.id)
         navigate('/add-order/'+params.id);
     };
+    const handleRemoveOrder = (params) => {
+        console.log("param  remove");
+        console.log(params);
+        setSelectedOrder(params)
+        setConfirmDelete(true);
+    };
+    const [selectedOrder, setSelectedOrder] = useState(null);
     const columns = [
         { field: 'id', headerName: 'ID', width: 90 },
         {
@@ -87,6 +95,7 @@ const OrdersPage = () => {
                         variant="contained"
                         color="error"
                         size="small"
+                        onClick={() => handleRemoveOrder(params.row)}
                     >
                         Delete
                     </Button>
@@ -98,6 +107,7 @@ const OrdersPage = () => {
 
         const fetchOrders = async () => {
             try {
+                setLoading(true); // Indicar que la carga ha finalizado
                 // console.log("ResultAPI")
                 const response = await fetch('http://localhost:8060/api/orders/getOrders');
                 const data = await response.json();
@@ -110,8 +120,9 @@ const OrdersPage = () => {
                     finalPrice: order.finalPrice.toFixed(2)
                 }));
                 //console.log("formattedData")
-                //console.log(formattedData)
+                console.log(formattedData)
                 setRows(formattedData);
+                setLoading(false); // Indicar que la carga ha finalizado
             } catch (error) {
                 console.error("Error fetching orders:", error);
             }
@@ -122,8 +133,49 @@ const OrdersPage = () => {
     const handleAddOrder = () => {
         navigate('/add-order/new');
     };
+    const handleCloseConfirmDeleteModal = () => setConfirmDelete(false);
+    const handleConfirmDelete = () => {
+        fetch(`http://localhost:8060/api/orders/delete/${selectedOrder.id}`, {
+            method: 'DELETE'
+        })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to delete order');
+                }
+                // Aquí puedes hacer algo después de borrar el pedido, como actualizar la lista de pedidos
+                // o mostrar un mensaje de éxito
+                console.log('Order deleted successfully');
+            })
+            .catch(error => {
+                console.error('Error deleting order:', error);
+                // Aquí puedes mostrar un mensaje de error al usuario si la eliminación falla
+            })
+            .finally(() => {
+                setConfirmDelete(false); // Esto cierra el modal de confirmación después de enviar la solicitud
+            });
+    };
     return (
+
         <Container maxWidth="xl" sx={{py:20}}>
+            <Modal
+                open={openConfirmDeleteModal}
+                onClose={handleCloseConfirmDeleteModal}
+                aria-labelledby="delete-product-line-modal"
+                aria-describedby="delete-product-line-product-form"
+            >
+                <Paper sx={{ padding: 2, width: 300, margin: '100px auto' }}>
+                    <Typography variant="h6" id="confirm-delete-modal">
+                        Confirm Deletion
+                    </Typography>
+                    <Typography id="confirm-delete-form">
+                        Are you sure you want to delete {selectedOrder && selectedOrder.order}?
+                    </Typography>
+                    <Box display="flex" justifyContent="flex-end" sx={{ mt: 2 }}>
+                        <Button variant="contained" color="primary" onClick={handleConfirmDelete}>
+                            Confirm
+                        </Button>
+                    </Box>                </Paper>
+            </Modal>
             <Box display="flex" justifyContent="space-between" alignItems="center">
                 <Typography variant="h4" sx={{ marginBottom: 2 }}>My Orders</Typography>
                 <Button
@@ -137,20 +189,44 @@ const OrdersPage = () => {
             <Grid container spacing={3} sx={{py:10}}>
                 <Grid item xs={12} sm={12} md={12}>
                 <Box sx={{ height: 400, width: '100%' }}>
-                    <DataGrid
-                        rows={rows}
-                        columns={columns}
-                        initialState={{
-                            pagination: {
-                                paginationModel: {
-                                    pageSize: 5,
+                    {loading ? (
+                            <Box
+                                sx={{
+                                    display: 'flex',
+                                    flexDirection: 'column',
+                                    justifyContent: 'center',
+                                    alignItems: 'center',
+                                    textAlign: 'center',
+                                    height: 'auto', // Permite que el contenido se ajuste automáticamente
+                                    mt: '10%', // Ajusta la distancia desde la parte superior
+                                    mb: '10%', // Ajusta la distancia desde la parte inferior
+                                    width: '100%',
+                                }}
+                            >
+                                <CircularProgress color="primary" />
+                                <Typography variant="h6" sx={{ mt: 1 }}>
+                                    Loading...
+                                </Typography>
+                            </Box>
+                        ): (
+
+                        <DataGrid
+                            rows={rows}
+                            columns={columns}
+                            initialState={{
+                                pagination: {
+                                    paginationModel: {
+                                        pageSize: 5,
+                                    },
                                 },
-                            },
-                        }}
-                        pageSizeOptions={[3,5]}
-                        checkboxSelection
-                        disableRowSelectionOnClick
-                    />
+                            }}
+                            pageSizeOptions={[3,5]}
+                            checkboxSelection
+                            disableRowSelectionOnClick
+                        />
+                        )}
+
+
                 </Box>
                 </Grid>
             </Grid>

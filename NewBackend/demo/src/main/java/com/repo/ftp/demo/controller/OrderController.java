@@ -6,6 +6,7 @@ import com.repo.ftp.demo.exception.ResourceNotFoundException;
 import com.repo.ftp.demo.service.OrderService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.Date;
@@ -30,7 +31,7 @@ public class OrderController {
         orders.forEach(order -> {
             LocalDateTime orderDateTime = order.getDate().toInstant().atZone(ZoneId.systemDefault()).toLocalDateTime();
             LocalDateTime adjustedDateTime = orderDateTime.minusHours(5); // Ajustar según tu zona horaria
-            order.setDate(java.util.Date.from(adjustedDateTime.atZone(ZoneId.systemDefault()).toInstant()));
+            order.setDate(Date.from(adjustedDateTime.atZone(ZoneId.systemDefault()).toInstant()));
         });
 
         return orders;
@@ -67,7 +68,7 @@ public class OrderController {
         LocalDateTime adjustedDateTime = orderDateTime.minusHours(5);
 
         // Actualizar la fecha del pedido con la fecha ajustada
-        order.setDate(java.util.Date.from(adjustedDateTime.atZone(ZoneId.systemDefault()).toInstant()));
+        order.setDate(Date.from(adjustedDateTime.atZone(ZoneId.systemDefault()).toInstant()));
 
         return Optional.of(order);
     }

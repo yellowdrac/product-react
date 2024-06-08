@@ -141,8 +141,13 @@ const AddEditOrderPage = () => {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(orderData)
             };
+            let response = ""
+            if(isEdit){
+                response = await fetch('http://localhost:8060/api/orders/update', requestOptions);
+            }else{
+                response = await fetch('http://localhost:8060/api/orders/create', requestOptions);
+            }
 
-            const response = await fetch('http://localhost:8060/api/orders/save', requestOptions);
             if (!response.ok) {
                 throw new Error('Failed to save order');
             }
